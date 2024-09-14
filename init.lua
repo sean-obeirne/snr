@@ -247,17 +247,23 @@ end
 -- end
 local function escape_vim_regex(text)
     -- Escapes characters that are special in Vim regex
-    local escaped_text = text:gsub("([\\%^$().[%]*+?-])", "\\%1")
+    local escaped_text = text:gsub("([\\%^$.[%]*+?-])", "\\%1")
     escaped_text = escaped_text:gsub("/", "\\/")
+    return escaped_text
+end
+
+local function escape_vim_replacement(text)
+    -- Escapes characters that are special in Vim replacement strings
+    local escaped_text = text:gsub("([&\\~])", "\\%1")
     return escaped_text
 end
 
 local function execute()
     vim.api.nvim_set_current_win(main_window)
     local escaped_search_text = escape_vim_regex(search_text)
-    local escaped_replace_text = escape_vim_regex(replace_text)
+    local escaped_replace_text = escape_vim_replacement(replace_text)
     if show_replace then
-        vim.cmd(string.format("%%s/%s/%s/ce", escaped_search_text, escaped_replace_text))
+        vim.cmd(string.format("%%s/%s/%s/gce", escaped_search_text, escaped_replace_text))
         -- print("running " .. string.format("%%s/%s/%s/ce", escaped_search_text, escaped_replace_text))
     else -- means we are just searching
         -- Perform the search operation and check if the search text is found
@@ -302,6 +308,8 @@ end
 
 
 function M.main()
+
+    main_window = vim.api.nvim_get_current_win()
 
     search_init()
     replace_init()
