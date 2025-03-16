@@ -247,21 +247,29 @@ end
 -- end
 local function escape_vim_regex(text)
     -- Escapes characters that are special in Vim regex
-    local escaped_text = text:gsub("([\\%^$.[%]*+?-])", "\\%1")
-    escaped_text = escaped_text:gsub("/", "\\/")
-    return escaped_text
+    -- local escaped_text = text:gsub("([\\%^$().[%]*+?-])", "\\%1")
+    -- escaped_text = escaped_text:gsub("/", "\\/")
+    -- return escaped_text
+
+	return vim.fn.escape(text, [[\.^$*+~[]/]])
 end
 
 local function escape_vim_replacement(text)
     -- Escapes characters that are special in Vim replacement strings
-    local escaped_text = text:gsub("([&\\~])", "\\%1")
-    return escaped_text
+    -- local escaped_text = text:gsub("([&\\~])", "\\%1")
+    -- return escaped_text
+
+	return text:gsub("([&\\])", "\\%1")
 end
 
 local function execute()
     vim.api.nvim_set_current_win(main_window)
-    local escaped_search_text = escape_vim_regex(search_text)
+    -- local escaped_search_text = escape_vim_regex(search_text)
+    -- local escaped_search_text = '\\V' .. escape_vim_regex(search_text)
+    local escaped_search_text = '\\V\\C' .. vim.fn.escape(search_text, '\\')
     local escaped_replace_text = escape_vim_replacement(replace_text)
+	print("Escaped Search Text:", escaped_search_text)
+    print("Escaped Replace Text:", escaped_replace_text)
     if show_replace then
         vim.cmd(string.format("%%s/%s/%s/gce", escaped_search_text, escaped_replace_text))
         -- print("running " .. string.format("%%s/%s/%s/ce", escaped_search_text, escaped_replace_text))
